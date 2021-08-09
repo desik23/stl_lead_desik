@@ -1,0 +1,63 @@
+---
+title: "STL Lead Inequity"
+author: "Desik Somasundaram"
+date: "8/9/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,fig.width=6, fig.height=5)
+
+library(tidyverse)
+library(janitor)
+library(here)
+```
+
+## Read In and Explore the Data
+
+```{r}
+stl_lead <- read_delim(here::here("data", "stl_blood_lead.csv"), delim = ";")
+
+stl_lead <- stl_lead %>% clean_names()
+
+```
+```{r}
+
+head(stl_lead)
+
+tail(stl_lead)
+
+stl_lead_prop <- data.frame(stl_lead)
+
+stl_lead_prop <-dplyr::mutate(stl_lead_prop, prop_white = ((white / total_pop)*100))
+
+stl_lead_prop <-dplyr::mutate(stl_lead_prop, pct_elevated = str_replace(pct_elevated, pattern = ",", replacement = "."))
+
+stl_lead_prop <-dplyr::mutate(stl_lead_prop, pct_elevated = as.numeric(pct_elevated))
+
+```
+## Create a new Scatterplot
+
+```{r}
+stl_lead_plot <- ggplot((data = stl_lead_prop)) + geom_point(aes(x = pct_elevated, y = prop_white), color = "red", size = 3, shape = 21)
+
+
+stl_lead_plot
+
+ggsave(here::here("figs", "stl_lead_plot.png"), plot = stl_lead_plot)
+
+```
+
+### The overall trend indicates that the pct_elevated is increases as the proportion of the population that's white decreases.
+
+## Create a new Histogram
+
+```{r}
+stl_lead_hist <- ggplot((data = stl_lead_prop)) + geom_histogram(aes(pct_elevated), color = "red")
+
+
+stl_lead_hist
+
+ggsave(here::here("figs", "stl_lead_hist.jpg"), plot = stl_lead_hist)
+
+```
